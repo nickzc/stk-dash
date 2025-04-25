@@ -5,9 +5,13 @@ import {
   HttpException,
   HttpStatus,
   HttpCode,
+  Param,
 } from '@nestjs/common';
 import { StocksService } from './stocks.service';
-import { StocksResponse } from './interfaces/stocks.interface';
+import {
+  StocksResponse,
+  StockDetailResponse,
+} from './interfaces/stocks.interface';
 
 @Controller('api')
 export class StocksController {
@@ -34,6 +38,35 @@ export class StocksController {
         {
           success: false,
           message: 'Failed to fetch stock data',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * getStockDetail
+   * @param symbol
+   * @returns
+   */
+  @Get('stocks/:symbol')
+  @HttpCode(HttpStatus.OK)
+  async getStockDetail(
+    @Param('symbol') symbol: string,
+  ): Promise<StockDetailResponse> {
+    try {
+      const stockDetail = await this.stocksService.getStockDetail(symbol);
+      return {
+        success: true,
+        data: stockDetail,
+      };
+    } catch (error) {
+      this.logger.error(`Error in getStockDetail controller: ${error.message}`);
+      throw new HttpException(
+        {
+          success: false,
+          message: `Failed to fetch stock details for ${symbol}`,
           error: error.message,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

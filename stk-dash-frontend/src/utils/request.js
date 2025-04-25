@@ -34,7 +34,6 @@ service.interceptors.request.use(
 // Response interceptor
 service.interceptors.response.use(
   (response) => {
-    debugger
     const result = response.data
     return result
   },

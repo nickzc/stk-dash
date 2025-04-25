@@ -17,14 +17,14 @@
             <span>${{ scope.row.price }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Change" min-width="120" sortable>
+        <el-table-column prop="change" label="Change" min-width="120" sortable>
           <template #default="scope">
             <span :class="{ positive: scope.row.change > 0, negative: scope.row.change < 0 }">
               {{ scope.row.change > 0 ? '+' : '' }}{{ scope.row.change }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="Change %" min-width="120" sortable>
+        <el-table-column prop="changePercent" label="Change %" min-width="120" sortable>
           <template #default="scope">
             <span
               :class="{
@@ -148,34 +148,39 @@ const fetchStockList = async () => {
   }
 }
 </script>
-
 <style scoped>
 .stock-list-container {
   padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
 .title {
   margin-bottom: 20px;
   color: #303133;
+  font-family: Arial, sans-serif;
 }
 
 .stock-list-card {
   margin-bottom: 20px;
+  font-family: Arial, sans-serif;
 }
 
 .positive {
   color: #67c23a;
   font-weight: bold;
+  font-family: Arial, sans-serif;
 }
 
 .negative {
   color: #f56c6c;
   font-weight: bold;
+  font-family: Arial, sans-serif;
 }
 
 .clickable-row {
   cursor: pointer;
   transition: background-color 0.3s;
+  font-family: Arial, sans-serif;
 }
 
 .clickable-row:hover {
@@ -185,6 +190,7 @@ const fetchStockList = async () => {
 .action-buttons {
   display: flex;
   align-items: center;
+  font-family: Arial, sans-serif;
 }
 
 .favorite-btn {

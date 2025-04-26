@@ -1,3 +1,4 @@
+assets/base.css */
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
   --vt-c-white: #ffffff;
@@ -19,6 +20,13 @@
   --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+
+  /* Element Plus variables for light mode */
+  --el-bg-color: #ffffff;
+  --el-text-color-primary: #303133;
+  --bg-color: #f5f7fa;
+  --text-color: #303133;
+  --border-color: #dcdfe6;
 }
 
 /* semantic color variables for this project */
@@ -36,7 +44,28 @@
   --section-gap: 160px;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Dark mode variables */
+html.dark {
+  --color-background: var(--vt-c-black);
+  --color-background-soft: var(--vt-c-black-soft);
+  --color-background-mute: var(--vt-c-black-mute);
+
+  --color-border: var(--vt-c-divider-dark-2);
+  --color-border-hover: var(--vt-c-divider-dark-1);
+
+  --color-heading: var(--vt-c-text-dark-1);
+  --color-text: var(--vt-c-text-dark-2);
+
+  /* Element Plus variables for dark mode */
+  --el-bg-color: #1d1e1f;
+  --el-text-color-primary: #e5eaf3;
+  --bg-color: #141414;
+  --text-color: #e5eaf3;
+  --border-color: #4c4d4f;
+}
+
+/* The default media query can be removed since we're handling dark mode via class */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --color-background: var(--vt-c-black);
     --color-background-soft: var(--vt-c-black-soft);
@@ -48,7 +77,7 @@
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
   }
-}
+} */
 
 *,
 *::before,

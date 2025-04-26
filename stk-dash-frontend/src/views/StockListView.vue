@@ -1,6 +1,37 @@
 <template>
   <div class="stock-list-container">
-    <h1 class="title">Stock Dashboard</h1>
+    <div class="header-container">
+      <h1 class="title">Stock Dashboard</h1>
+      <div class="theme-toggle">
+        <el-tooltip content="Light Mode" placement="top" :hide-after="300">
+          <el-button
+            class="theme-button"
+            :class="{ active: themeMode === 'light' }"
+            @click="setThemeMode('light')"
+          >
+            <el-icon><Sunny /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="System Preference" placement="top" :hide-after="300">
+          <el-button
+            class="theme-button"
+            :class="{ active: themeMode === 'system' }"
+            @click="setThemeMode('system')"
+          >
+            <el-icon><Monitor /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="Dark Mode" placement="top" :hide-after="300">
+          <el-button
+            class="theme-button"
+            :class="{ active: themeMode === 'dark' }"
+            @click="setThemeMode('dark')"
+          >
+            <el-icon><Moon /></el-icon>
+          </el-button>
+        </el-tooltip>
+      </div>
+    </div>
 
     <el-card class="stock-list-card">
       <el-table
@@ -67,7 +98,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getStockList } from '../utils/api'
 
@@ -75,6 +106,8 @@ const router = useRouter()
 const tableData = ref([])
 const loading = ref(false)
 const favorites = ref([])
+const themeMode = ref('system') // 'light', 'dark', or 'system'
+let mediaQueryList = null
 
 const handleClick = (row) => {
   router.push({
@@ -120,15 +153,43 @@ const toggleFavorite = (row) => {
   }
 }
 
-onMounted(() => {
-  fetchStockList()
-  // Load favorites from localStorage if available
-  const storedFavorites = localStorage.getItem('favoriteStocks')
-  if (storedFavorites) {
-    favorites.value = JSON.parse(storedFavorites)
+// Apply theme based on current theme mode
+const applyTheme = () => {
+  if (themeMode.value === 'system') {
+    // Use system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    toggleDarkMode(prefersDark)
+  } else {
+    // Use explicit user choice
+    toggleDarkMode(themeMode.value === 'dark')
   }
-})
 
+  // Save user preference
+  localStorage.setItem('themeMode', themeMode.value)
+}
+
+// Handle system theme preference changes
+const handleSystemThemeChange = (e) => {
+  if (themeMode.value === 'system') {
+    toggleDarkMode(e.matches)
+  }
+}
+
+// Set the theme mode and apply it
+const setThemeMode = (mode) => {
+  themeMode.value = mode
+  applyTheme()
+}
+
+// Toggle dark mode on/off
+const toggleDarkMode = (isDark) => {
+  if (isDark) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+// Fetch stock list from API
 const fetchStockList = async () => {
   try {
     loading.value = true
@@ -147,17 +208,77 @@ const fetchStockList = async () => {
     loading.value = false
   }
 }
+
+onMounted(() => {
+  fetchStockList()
+
+  // Load favorites from localStorage if available
+  const storedFavorites = localStorage.getItem('favoriteStocks')
+  if (storedFavorites) {
+    favorites.value = JSON.parse(storedFavorites)
+  }
+
+  // Set up theme based on saved preference or system default
+  const savedThemeMode = localStorage.getItem('themeMode')
+  if (savedThemeMode) {
+    themeMode.value = savedThemeMode
+  }
+
+  // Set up media query for system preference detection
+  mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQueryList.addEventListener('change', handleSystemThemeChange)
+
+  // Apply the current theme
+  applyTheme()
+})
+
+onUnmounted(() => {
+  // Clean up media query listener
+  if (mediaQueryList) {
+    mediaQueryList.removeEventListener('change', handleSystemThemeChange)
+  }
+})
 </script>
+
+//scoped styles
 <style scoped>
 .stock-list-container {
   padding: 20px;
   font-family: Arial, sans-serif;
+  min-height: 100vh;
+  background-color: var(--color-background);
+  transition: background-color 0.3s;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .title {
-  margin-bottom: 20px;
-  color: #303133;
+  margin-bottom: 0;
+  color: var(--color-text);
   font-family: Arial, sans-serif;
+}
+
+.theme-toggle {
+  display: flex;
+  gap: 5px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.theme-button {
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: var(--el-text-color-primary, #303133);
+}
+
+.theme-button.active {
+  background-color: var(--el-color-primary, #409eff);
+  color: white;
 }
 
 .stock-list-card {
@@ -196,5 +317,46 @@ const fetchStockList = async () => {
 .favorite-btn {
   margin-left: 8px;
   padding: 4px;
+}
+
+/* Dark mode specific styles */
+:global(html.dark) .stock-list-container {
+  background-color: var(--color-background);
+}
+
+:global(html.dark) .stock-list-card {
+  background-color: var(--color-background-soft);
+}
+
+:global(html.dark) .el-card {
+  border-color: var(--color-border);
+}
+
+:global(html.dark) .el-table {
+  background-color: var(--color-background-soft);
+}
+
+:global(html.dark) .el-table tr,
+:global(html.dark) .el-table th {
+  background-color: var(--color-background-soft);
+}
+
+:global(html.dark) .el-table--striped .el-table__body tr.el-table__row--striped td {
+  background-color: var(--color-background-mute);
+}
+:global(html.dark) .title {
+  color: white !important;
+}
+
+:global(html.dark) .clickable-row:hover {
+  background-color: #363637;
+}
+
+:global(html.dark) .positive {
+  color: #95d475;
+}
+
+:global(html.dark) .negative {
+  color: #ff7875;
 }
 </style>

@@ -36,6 +36,13 @@ export interface StockTimeSeriesResponse {
       '5. volume': string;
     };
   };
+  'Meta Data': {
+    '1. Information': string;
+    '2. Symbol': string;
+    '3. Last Refreshed': string;
+    '4. Output Size': string;
+    '5. Time Zone': string;
+  };
 }
 
 //stock quote data used internally by the application

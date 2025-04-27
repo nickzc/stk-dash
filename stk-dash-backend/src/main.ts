@@ -14,8 +14,8 @@ async function bootstrap() {
 
   const port = process.env.PORT;
   await app.listen(port || 3000);
-  // console.log(process.env);
-  // console.log('API_KEY:', process.env.API_KEY);
-  // console.log('API_URL:', process.env.API_URL);
+  console.log(process.env);
+  console.log('API_KEY:', process.env.API_KEY);
+  console.log('API_URL:', process.env.API_URL);
 }
 bootstrap();

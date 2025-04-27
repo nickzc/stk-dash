@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: ./stk-dash-backend
+      dockerfile: Dockerfile
+    container_name: nestjs-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./stk-dash-backend/logs:/usr/src/app/logs
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./stk-dash-frontend
+      dockerfile: Dockerfile
+    container_name: vuejs-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

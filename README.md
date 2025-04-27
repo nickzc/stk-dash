@@ -1,1 +1,171 @@
-# stk-dash
+# 📈 stk-dash
+
+## Project Overview
+
+This project is a simple stock dashboard application with a **NestJS** backend and a **Vue.js** frontend.
+
+---
+
+## 🚀 How to Run
+
+### Option 1: Run Frontend and Backend Separately
+
+#### Backend (NestJS)
+
+```bash
+# Install dependencies (if not already installed)
+npm install
+
+# Start the development server
+nest start
+```
+
+#### Frontend (Vue.js)
+
+```bash
+# Install dependencies (if not already installed)
+npm install
+
+# Start the development server
+npm run dev
+```
+
+### Environment Configuration
+
+Before running, make sure to create the following environment files for both frontend and backend:
+
+#### Frontend (.env.development and .env.production)
+
+- **.env.development**
+
+  ```env
+  VITE_API_URL=http://localhost:3000/api/
+  ```
+
+- **.env.production**
+  ```env
+  VITE_API_URL=/api
+  ```
+
+#### Backend (.env.development and .env.production)
+
+- **.env.development**
+
+  ```env
+  API_URL=https://b3b37fc3-b211-4663-b669-6db42966ac2a.mock.pstmn.io/query?
+  API_KEY=LLPUXXZ8FW82ORWG
+  PORT=3000
+  ```
+
+- **.env.production**
+  ```env
+  API_URL=https://www.alphavantage.co/query?
+  API_KEY=LLPUXXZ8FW82ORWG
+  PORT=3000
+  ```
+
+Additionally, a mock dataset **Alpha Vantage Mock.postman_collection.json** has been uploaded. You can import it into Postman for development and testing purposes.
+
+---
+
+### Option 2: Run with Docker Compose
+
+```bash
+docker-compose up -d --build
+```
+
+---
+
+### 📋 E2E Test Command (Frontend)
+
+```bash
+npx playwright test e2e/vue.spec.js
+```
+
+---
+
+## 🎯 Features Implemented
+
+- The project integrates the following Alpha Vantage APIs:
+
+  - `LISTING_STATUS`: Retrieves a CSV of all listed stocks. I randomly selected 10 stocks from it.
+  - `GLOBAL_QUOTE`: Retrieves real-time price, change percentage, and other quick info, used for the **GET `/api/stocks`** endpoint.
+  - `TIME_SERIES_DAILY`: Retrieves daily historical OHLCV (open, high, low, close, volume) data.
+  - `OVERVIEW`: Retrieves fundamental company information, combined to create the **GET `/api/stocks/:symbol`** endpoint.
+
+- During development, due to the financial nature of the data, **precision** was especially important.  
+  JavaScript's floating-point precision issues were addressed by consistently formatting numbers with `toFixed(2)` to ensure two decimal places.
+
+- Testing implemented:
+  - **Unit tests** with Jest.
+  - **End-to-end (E2E) tests** with Playwright.
+
+---
+
+## 🌟 Possible Improvements
+
+Given more time, the following improvements are planned:
+
+1. **Favorite Stocks Feature**  
+   Use `pg-promise` to connect to PostgreSQL, storing users' favorite stock symbols persistently.  
+   After fetching the stock list, compare symbols to update the "favorite" status dynamically.
+
+2. **User Login and Authentication**  
+   Implement a user login feature using AWS Cognito, issuing a JWT token after authentication.  
+   The token would be attached to API request headers to:
+
+   - Ensure only authenticated users can access or modify sensitive data.
+   - Support personalized features, like a user-specific watchlist.
+   - Improve the system's overall security and compliance.
+
+3. **Enhanced Stock Search Flow**  
+   Instead of hardcoding a list, allow users to search for symbols dynamically.  
+   Use the `SYMBOL_SEARCH` API to assist users in finding stocks and then fetch real-time data with `GLOBAL_QUOTE` to update the dashboard dynamically.
+
+4. **Use npm Workspaces to Manage Monorepo**  
+   Utilize npm workspaces to better manage the mono-repo structure of frontend and backend projects, improving dependency management and developer workflow.
+
+5. **Performance Improvements**  
+   future improvements could include optimizing API response caching and implementing lazy loading where applicable.
+
+---
+
+## 🛡️ Security Considerations
+
+Several basic security measures have been considered during development:
+
+- **Cross-Site Scripting (XSS) Prevention**
+
+  - Vue templates automatically escape HTML to prevent XSS by default.
+  - No `v-html` directives are used unless the content source is explicitly sanitized and trusted.
+
+- **Cross-Site Request Forgery (CSRF) Prevention**
+
+  - Since the project uses a pure RESTful API architecture and JWT-based authentication is planned, CSRF attack surfaces are inherently minimized.
+  - Further protection can be achieved by validating the `Origin` and `Referer` headers server-side.
+
+- **Authentication and Authorization (Planned)**
+  - AWS Cognito will be used for identity management.
+  - Role-Based Access Control (RBAC) can be applied to grant different permissions based on user roles in future improvements.
+
+---
+
+## 🧩 Project Structure
+
+```text
+stk-dash/
+├─ stk-backend/        # NestJS Backend Project
+├─ stk-frontend/       # Vue.js Frontend Project
+├─ docker-compose.yml
+├─ README.md
+
+```
+
+---
+
+## 🔗 Technologies Used
+
+- **Backend:** NestJS, Axios, Jest
+- **Frontend:** Vue.js, Vite, Playwright
+
+---

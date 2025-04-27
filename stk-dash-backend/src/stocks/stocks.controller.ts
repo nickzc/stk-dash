@@ -6,13 +6,11 @@ import {
   HttpStatus,
   HttpCode,
   Param,
+  BadRequestException,
 } from '@nestjs/common';
 import { StocksService } from './stocks.service';
-import {
-  StocksResponse,
-  StockDetailResponse,
-} from './interfaces/stocks.interface';
-
+import { StocksResponse } from './types/stocks';
+import { StockDetailResponse } from './types/stocks.detail';
 @Controller('api')
 export class StocksController {
   private readonly logger = new Logger(StocksController.name);
@@ -33,7 +31,26 @@ export class StocksController {
         data: stocks,
       };
     } catch (error) {
-      this.logger.error(`Error in getStocks controller: ${error.message}`);
+      this.logger.error(
+        `Failed to fetch stock data. Error in getStocks controller: ${error.message}`,
+      );
+      let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+      let errorMessage = 'Failed to fetch stock data';
+      if (error instanceof HttpException) {
+        throw error;
+      } else if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+        // Handle connection issues with external services
+        statusCode = HttpStatus.SERVICE_UNAVAILABLE;
+        errorMessage = 'Stock data service currently unavailable';
+      } else if (error.response?.status === 403) {
+        // Handle authorization errors from external APIs
+        statusCode = HttpStatus.FORBIDDEN;
+        errorMessage = 'Access to stock data is restricted';
+      } else if (error.response?.status === 429) {
+        // Handle rate limiting
+        statusCode = HttpStatus.TOO_MANY_REQUESTS;
+        errorMessage = 'Rate limit exceeded for stock data service';
+      }
       throw new HttpException(
         {
           success: false,
@@ -47,7 +64,7 @@ export class StocksController {
 
   /**
    * getStockDetail
-   * @param symbol
+   * @param symbol Stock symbol as string
    * @returns
    */
   @Get('stocks/:symbol')
@@ -55,6 +72,15 @@ export class StocksController {
   async getStockDetail(
     @Param('symbol') symbol: string,
   ): Promise<StockDetailResponse> {
+    //if symbol is not provided or is not a string, throw a BadRequestException
+    if (!symbol || typeof symbol !== 'string') {
+      throw new BadRequestException({
+        success: false,
+        message: 'Invalid stock symbol',
+        error: 'Stock symbol is required and must be a string',
+      });
+    }
+
     try {
       const stockDetail = await this.stocksService.getStockDetail(symbol);
       return {
@@ -63,6 +89,23 @@ export class StocksController {
       };
     } catch (error) {
       this.logger.error(`Error in getStockDetail controller: ${error.message}`);
+      let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+      let errorMessage = 'Failed to fetch stock data';
+      if (error instanceof HttpException) {
+        throw error;
+      } else if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+        // Handle connection issues with external services
+        statusCode = HttpStatus.SERVICE_UNAVAILABLE;
+        errorMessage = 'Stock data service currently unavailable';
+      } else if (error.response?.status === 403) {
+        // Handle authorization errors from external APIs
+        statusCode = HttpStatus.FORBIDDEN;
+        errorMessage = 'Access to stock data is restricted';
+      } else if (error.response?.status === 429) {
+        // Handle rate limiting
+        statusCode = HttpStatus.TOO_MANY_REQUESTS;
+        errorMessage = 'Rate limit exceeded for stock data service';
+      }
       throw new HttpException(
         {
           success: false,

@@ -11,11 +11,3 @@ export const DEFAULT_STOCKS = [
   { symbol: 'ORCL', name: 'Oracle Corp.' },
   { symbol: 'ADBE', name: 'Adobe Inc.' },
 ];
-
-// Alpha Vantage API Key
-export const ALPHA_VANTAGE_API_KEY = 'LLPUXXZ8FW82ORWG';
-
-// Alpha Vantage Base URL
-export const ALPHA_VANTAGE_BASE_URL =
-  process.env.API_URL ||
-  'https://7fb3233e-adce-41f3-9d3b-f065fc177a62.mock.pstmn.io/query?';

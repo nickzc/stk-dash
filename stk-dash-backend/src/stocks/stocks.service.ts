@@ -2,23 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 //axios is used to make HTTP requests
 import { HttpService } from '@nestjs/axios';
 //rxjs is used to handle the response from the API
-import { catchError, firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, from } from 'rxjs';
 
 import { AxiosError } from 'axios';
 
+import { DEFAULT_STOCKS } from './constants/stocks.constants';
 import {
-  DEFAULT_STOCKS,
-  ALPHA_VANTAGE_API_KEY,
-  ALPHA_VANTAGE_BASE_URL,
-} from './constants/stocks.constants';
-import {
-  StockDetail,
-  StockOverviewResponse,
   StockQuote,
   StockQuoteResponse,
   StockTimeSeriesResponse,
-} from './interfaces/stocks.interface';
-
+} from './types/stocks';
+import { StockDetail, StockOverviewResponse } from './types/stocks.detail';
 @Injectable()
 export class StocksService {
   //logger for logging errors and information
@@ -33,7 +27,9 @@ export class StocksService {
   async getStockQuote(symbol: string): Promise<StockQuoteResponse> {
     try {
       // Construct the API URL
-      const apiUrl = `${ALPHA_VANTAGE_BASE_URL}function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`;
+      // console.log(process.env.API_URL);
+      // console.log(process.env.API_KEY);
+      const apiUrl = `${process.env.API_URL}function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${process.env.API_KEY}`;
       const { data } = await firstValueFrom(
         // Make the API call using HttpService
         this.httpService.get<StockQuoteResponse>(apiUrl).pipe(
@@ -133,7 +129,7 @@ export class StocksService {
   async getStockTimeSeries(symbol: string): Promise<StockTimeSeriesResponse> {
     try {
       // construct the API URL
-      const apiUrl = `${ALPHA_VANTAGE_BASE_URL}function=TIME_SERIES_DAILY&symbol=${symbol}&outputsize=compact&datatype=json&apikey=${ALPHA_VANTAGE_API_KEY}`;
+      const apiUrl = `${process.env.API_URL}function=TIME_SERIES_DAILY&symbol=${symbol}&outputsize=compact&datatype=json&apikey=${process.env.API_KEY}`;
 
       const { data } = await firstValueFrom(
         this.httpService.get<StockTimeSeriesResponse>(apiUrl).pipe(
@@ -164,8 +160,7 @@ export class StocksService {
    */
   async getStockOverview(symbol: string): Promise<StockOverviewResponse> {
     try {
-      // 构建 API URL
-      const apiUrl = `${ALPHA_VANTAGE_BASE_URL}function=OVERVIEW&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`;
+      const apiUrl = `${process.env.API_URL}function=OVERVIEW&symbol=${symbol}&apikey=${process.env.API_KEY}`;
 
       const { data } = await firstValueFrom(
         this.httpService.get<StockOverviewResponse>(apiUrl).pipe(

@@ -61,3 +61,26 @@ export const calculateDateRange = (timeRange) => {
 
   return startDate
 }
+
+/**
+ * Formats volume numbers with K, M suffixes for better readability
+ * @param {number|string} volume - The volume to format
+ * @returns {string} Formatted volume with appropriate suffix
+ */
+export const formatVolume = (volume) => {
+  if (!volume && volume !== 0) return '-'
+
+  if (typeof volume === 'string') {
+    volume = parseFloat(volume.replace(/[^0-9.-]+/g, ''))
+  }
+
+  if (isNaN(volume)) return '-'
+
+  if (volume >= 1000000) {
+    return (volume / 1000000).toFixed(2) + 'M'
+  } else if (volume >= 1000) {
+    return (volume / 1000).toFixed(2) + 'K'
+  }
+
+  return volume.toString()
+}

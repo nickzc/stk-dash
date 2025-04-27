@@ -2,35 +2,7 @@
   <div class="stock-list-container">
     <div class="header-container">
       <h1 class="title">Stock Dashboard</h1>
-      <div class="theme-toggle">
-        <el-tooltip content="Light Mode" placement="top" :hide-after="300">
-          <el-button
-            class="theme-button"
-            :class="{ active: themeMode === 'light' }"
-            @click="setThemeMode('light')"
-          >
-            <el-icon><Sunny /></el-icon>
-          </el-button>
-        </el-tooltip>
-        <el-tooltip content="System Preference" placement="top" :hide-after="300">
-          <el-button
-            class="theme-button"
-            :class="{ active: themeMode === 'system' }"
-            @click="setThemeMode('system')"
-          >
-            <el-icon><Monitor /></el-icon>
-          </el-button>
-        </el-tooltip>
-        <el-tooltip content="Dark Mode" placement="top" :hide-after="300">
-          <el-button
-            class="theme-button"
-            :class="{ active: themeMode === 'dark' }"
-            @click="setThemeMode('dark')"
-          >
-            <el-icon><Moon /></el-icon>
-          </el-button>
-        </el-tooltip>
-      </div>
+      <ThemeManager />
     </div>
 
     <el-card class="stock-list-card">
@@ -78,17 +50,6 @@
               <el-button link type="primary" size="small" @click.stop="handleClick(scope.row)">
                 Details
               </el-button>
-              <el-button
-                link
-                type="warning"
-                size="small"
-                @click.stop="toggleFavorite(scope.row)"
-                class="favorite-btn"
-              >
-                <el-icon :size="18" :color="isFavorite(scope.row.symbol) ? '#E6A23C' : '#909399'">
-                  <component :is="isFavorite(scope.row.symbol) ? 'StarFilled' : 'Star'" />
-                </el-icon>
-              </el-button>
             </div>
           </template>
         </el-table-column>
@@ -101,13 +62,12 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getStockList } from '../utils/api'
+import ThemeManager from '../components/ThemeToggle.vue'
 
+import { formatVolume } from '@/utils/formatters'
 const router = useRouter()
 const tableData = ref([])
 const loading = ref(false)
-const favorites = ref([])
-const themeMode = ref('system') // 'light', 'dark', or 'system'
-let mediaQueryList = null
 
 const handleClick = (row) => {
   router.push({
@@ -127,68 +87,6 @@ const tableRowClassName = () => {
   return 'clickable-row'
 }
 
-const formatVolume = (volume) => {
-  if (volume >= 1000000) {
-    return (volume / 1000000).toFixed(2) + 'M'
-  } else if (volume >= 1000) {
-    return (volume / 1000).toFixed(2) + 'K'
-  }
-  return volume
-}
-
-const isFavorite = (symbol) => {
-  return favorites.value.includes(symbol)
-}
-
-const toggleFavorite = (row) => {
-  const index = favorites.value.indexOf(row.symbol)
-  if (index === -1) {
-    favorites.value.push(row.symbol)
-    // Optionally save to localStorage
-    localStorage.setItem('favoriteStocks', JSON.stringify(favorites.value))
-  } else {
-    favorites.value.splice(index, 1)
-    // Optionally save to localStorage
-    localStorage.setItem('favoriteStocks', JSON.stringify(favorites.value))
-  }
-}
-
-// Apply theme based on current theme mode
-const applyTheme = () => {
-  if (themeMode.value === 'system') {
-    // Use system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    toggleDarkMode(prefersDark)
-  } else {
-    // Use explicit user choice
-    toggleDarkMode(themeMode.value === 'dark')
-  }
-
-  // Save user preference
-  localStorage.setItem('themeMode', themeMode.value)
-}
-
-// Handle system theme preference changes
-const handleSystemThemeChange = (e) => {
-  if (themeMode.value === 'system') {
-    toggleDarkMode(e.matches)
-  }
-}
-
-// Set the theme mode and apply it
-const setThemeMode = (mode) => {
-  themeMode.value = mode
-  applyTheme()
-}
-
-// Toggle dark mode on/off
-const toggleDarkMode = (isDark) => {
-  if (isDark) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-}
 // Fetch stock list from API
 const fetchStockList = async () => {
   try {
@@ -211,33 +109,9 @@ const fetchStockList = async () => {
 
 onMounted(() => {
   fetchStockList()
-
-  // Load favorites from localStorage if available
-  const storedFavorites = localStorage.getItem('favoriteStocks')
-  if (storedFavorites) {
-    favorites.value = JSON.parse(storedFavorites)
-  }
-
-  // Set up theme based on saved preference or system default
-  const savedThemeMode = localStorage.getItem('themeMode')
-  if (savedThemeMode) {
-    themeMode.value = savedThemeMode
-  }
-
-  // Set up media query for system preference detection
-  mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)')
-  mediaQueryList.addEventListener('change', handleSystemThemeChange)
-
-  // Apply the current theme
-  applyTheme()
 })
 
-onUnmounted(() => {
-  // Clean up media query listener
-  if (mediaQueryList) {
-    mediaQueryList.removeEventListener('change', handleSystemThemeChange)
-  }
-})
+onUnmounted(() => {})
 </script>
 
 //scoped styles
@@ -261,24 +135,6 @@ onUnmounted(() => {
   margin-bottom: 0;
   color: var(--color-text);
   font-family: Arial, sans-serif;
-}
-
-.theme-toggle {
-  display: flex;
-  gap: 5px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.theme-button {
-  border-radius: 4px;
-  padding: 8px 12px;
-  color: var(--el-text-color-primary, #303133);
-}
-
-.theme-button.active {
-  background-color: var(--el-color-primary, #409eff);
-  color: white;
 }
 
 .stock-list-card {
@@ -312,11 +168,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   font-family: Arial, sans-serif;
-}
-
-.favorite-btn {
-  margin-left: 8px;
-  padding: 4px;
 }
 
 /* Dark mode specific styles */

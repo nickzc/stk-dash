@@ -5,7 +5,10 @@ import { StocksModule } from './stocks/stocks.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      envFilePath: [
+        `.env.${process.env.NODE_ENV || 'development'}`,
+        '.env', // Fallback to plain .env file
+      ],
       isGlobal: true,
     }),
     StocksModule,
